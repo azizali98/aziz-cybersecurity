@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d0b">
+  <meta name="description" content="Cybersecurity write-ups, authorized security research, HTB labs, and technical notes by Aziz.">
+  <title>AZIZ // Cybersecurity</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="posts.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="scanline" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="AZIZ Security home"><span class="brand-mark">[A]</span><span>AZIZ<span class="green">_SEC</span></span></a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <nav class="nav" id="nav">
+      <a href="#writeups">HTB Write-ups</a>
+      <a href="#research">Bug Bounty</a>
+      <a href="#notes">Notes</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero container">
+      <div class="eyebrow"><span class="pulse"></span> CYBERSECURITY RESEARCH & WRITE-UPS</div>
+      <h1>Breaking things.<br><span class="green">Learning everything.</span></h1>
+      <p class="hero-copy">A personal knowledge base for hands-on security research, Hack The Box labs, web application security, and practical notes.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#writeups">Explore write-ups <span>↗</span></a>
+        <a class="button secondary" href="#about">About me</a>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><span></span><span></span><span></span><label>aziz@security: ~</label></div>
+        <div class="terminal-body">
+          <p><span class="green">aziz@security</span>:<span class="blue">~</span>$ whoami</p>
+          <p class="terminal-output">Cybersecurity Engineer | Lifelong Learner</p>
+          <p><span class="green">aziz@security</span>:<span class="blue">~</span>$ cat focus.txt</p>
+          <p class="terminal-output">Web Security · HTB · Bug Bounty · Linux</p>
+          <p><span class="green">aziz@security</span>:<span class="blue">~</span>$ <span class="cursor">█</span></p>
+        </div>
+      </div>
+      <div class="hero-grid" aria-label="Site sections">
+        <a href="#writeups" class="mini-card"><span class="mini-icon">⌘</span><span><b>HTB Write-ups</b><small>Labs & methodology</small></span><span class="card-arrow">↗</span></a>
+        <a href="#research" class="mini-card"><span class="mini-icon">⌁</span><span><b>Bug Bounty</b><small>Authorized research</small></span><span class="card-arrow">↗</span></a>
+        <a href="#notes" class="mini-card"><span class="mini-icon">▤</span><span><b>Notes & Cheatsheets</b><small>Commands & concepts</small></span><span class="card-arrow">↗</span></a>
+      </div>
+    </section>
+
+    <section class="section container" id="writeups">
+      <div class="section-heading"><div><p class="kicker">01 / LAB JOURNAL</p><h2>HTB <span class="green">Write-ups</span></h2></div><p class="section-desc">Document the process, not just the flag.</p></div>
+      <div class="filters" data-filter-group="htb">
+        <button class="filter active" data-category="all">All</button><button class="filter" data-category="easy">Easy</button><button class="filter" data-category="medium">Medium</button><button class="filter" data-category="hard">Hard</button>
+      </div>
+      <div class="post-grid" id="htbPosts"></div>
+    </section>
+
+    <section class="section section-alt" id="research">
+      <div class="container">
+        <div class="section-heading"><div><p class="kicker">02 / FIELD NOTES</p><h2>Bug Bounty <span class="green">Research</span></h2></div><p class="section-desc">Responsible testing, clear evidence, useful lessons.</p></div>
+        <div class="post-grid" id="researchPosts"></div>
+      </div>
+    </section>
+
+    <section class="section container" id="notes">
+      <div class="section-heading"><div><p class="kicker">03 / QUICK REFERENCE</p><h2>Notes & <span class="green">Cheatsheets</span></h2></div><p class="section-desc">Small notes worth finding again.</p></div>
+      <div class="search-row"><label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Search notes, tools, or topics..." aria-label="Search all posts"></label><span class="search-hint" id="searchCount">Browse the knowledge base</span></div>
+      <div class="tag-row" id="noteTags"></div>
+      <div class="post-grid" id="notePosts"></div>
+    </section>
+
+    <section class="section about-section" id="about">
+      <div class="container about-layout">
+        <div><p class="kicker">04 / OPERATOR PROFILE</p><h2>About <span class="green">Me</span></h2></div>
+        <div class="about-content">
+          <p class="about-lead">I'm Aziz, a communications engineering graduate focused on cybersecurity and practical security research.</p>
+          <p>This site is my public notebook: write-ups from legal training labs, lessons from authorized testing, and concise technical references. I aim to explain what I tried, what I observed, and what I learned.</p>
+          <div class="skill-list"><span>Web Security</span><span>Linux</span><span>Burp Suite</span><span>HTB</span><span>Security Operations</span></div>
+          <div class="social-links">
+            <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub ↗</a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn ↗</a>
+            <a href="https://www.youtube.com/" target="_blank" rel="noreferrer">YouTube ↗</a>
+          </div>
+          <p class="edit-note">Replace these social links with your real profiles before publishing.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container footer-inner"><a class="brand" href="#home"><span class="brand-mark">[A]</span><span>AZIZ<span class="green">_SEC</span></span></a><span>Built to learn. Written to share.</span><span class="footer-status"><i></i> SYSTEM OPERATIONAL</span></div><p class="disclaimer">All security testing described here should be performed only on systems you own or are explicitly authorized to test.</p></footer>
+
+  <dialog id="postDialog" class="post-dialog">
+    <div class="dialog-top"><span class="kicker">FIELD DOCUMENT</span><button id="closeDialog" class="close-dialog" aria-label="Close article">✕</button></div>
+    <div id="dialogContent"></div>
+  </dialog>
+</body>
+</html>
