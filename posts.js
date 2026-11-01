@@ -57,8 +57,6 @@ window.SITE_POSTS = [
     {type:"ul", items:["Inspect accessible SMB shares for tools that may reveal useful implementation details.","Decompile .NET applications when their credential-handling logic is relevant.","Combine LDAP enumeration with BloodHound to understand domain relationships and permissions.","Treat MachineAccountQuota as one part of the attack path, not proof of privilege escalation by itself.","Review computer-object ACLs and RBCD configuration to understand the actual security weakness.","Avoid publishing credentials, ticket material, or HTB flag values."]}
   ]
 },
-    
-  },
   {
     id: "htb-writeup-template",
     section: "htb",
