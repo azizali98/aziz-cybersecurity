@@ -108,7 +108,7 @@ window.SITE_POSTS = [
       {type:"ul", items:["Map endpoints and methods from documented or observed application flows.","Understand which identity and role each request represents.","Check object-level access with two accounts you control.","Review input validation and mass-assignment behavior without modifying real user data.","Look for sensitive information in errors and responses.","Document the baseline and the exact reproducible difference."]},
       {type:"p", text:"Treat unusual behavior as a lead to validate, not as a confirmed vulnerability by itself."}
     ]
-  }
+  },
 
   {
   id: "htb-support",
