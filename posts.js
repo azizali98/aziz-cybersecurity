@@ -146,4 +146,3 @@ window.SITE_POSTS = [
     ]
   },
 
-];
