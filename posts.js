@@ -145,4 +145,4 @@ window.SITE_POSTS = [
       {type:"p", text:"Treat unusual behavior as a lead to validate, not as a confirmed vulnerability by itself."}
     ]
   },
-
+];
