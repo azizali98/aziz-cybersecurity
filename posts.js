@@ -2,24 +2,62 @@
 // Article body supports simple paragraphs, headings, bullet lists, and code blocks.
 window.SITE_POSTS = [
   {
-    id: "htb-opensecret",
-    section: "htb",
-    title: "OpenSecret — Challenge Notes",
-    date: "2026-10-30",
-    difficulty: "Easy",
-    readTime: "6 min read",
-    tags: ["HTB", "Web", "Enumeration"],
-    excerpt: "A structured place to document the initial enumeration, key observations, and lessons from the OpenSecret challenge.",
-    body: [
-      {type:"p", text:"This is a starter write-up template. Replace the example content with your own verified observations before publishing."},
-      {type:"h3", text:"1. Scope and enumeration"},
-      {type:"p", text:"Record the target address, exposed services, versions, and the exact commands used. Keep testing within the lab scope."},
-      {type:"code", text:"nmap -sC -sV -oN nmap.txt TARGET_IP"},
-      {type:"h3", text:"2. Key observations"},
-      {type:"ul", items:["What did you discover?","Which observation changed your direction?","How did you validate the finding?"]},
-      {type:"h3", text:"3. Lessons learned"},
-      {type:"p", text:"Explain the reasoning behind each step, not just a list of commands. Add screenshots and sanitized evidence where useful."}
-    ]
+  id: "htb-support",
+  section: "htb",
+  title: "Support — Active Directory",
+  date: "2026-11-01",
+  difficulty: "Easy",
+  readTime: "12 min read",
+  tags: ["HTB", "Active Directory", "SMB", "LDAP", "BloodHound", "RBCD"],
+  excerpt: "An Active Directory attack path involving SMB enumeration, .NET reverse engineering, credential discovery, WinRM access, and Resource-Based Constrained Delegation.",
+  body: [
+    {type:"p", text:"Support is an Active Directory lab focused on enumeration, credential discovery, and delegation-based privilege escalation. This write-up follows the observations and commands recorded during the machine walkthrough."},
+
+    {type:"h3", text:"1. Initial enumeration"},
+    {type:"p", text:"The initial Nmap scan identified DNS, Kerberos, LDAP, SMB, and WinRM. LDAP revealed the domain name support.htb. Replace TARGET_IP with the current HTB target address because the IP may change after a reset."},
+    {type:"code", text:"nmap -sC -sV -oN nmap.txt TARGET_IP"},
+
+    {type:"h3", text:"2. SMB enumeration"},
+    {type:"p", text:"Listing the SMB shares revealed an accessible support-tools share containing portable utilities, including UserInfo.exe.zip."},
+    {type:"code", text:"smbclient -L //TARGET_IP/\nsmbclient //TARGET_IP/support-tools\nls\nget UserInfo.exe.zip"},
+
+    {type:"h3", text:"3. Reverse-engineering UserInfo.exe"},
+    {type:"p", text:"After extracting the archive, I decompiled the .NET executable with ILSpy to inspect its credential-handling logic."},
+    {type:"code", text:"ilspycmd UserInfo.exe > UserInfo.cs"},
+    {type:"p", text:"The observed implementation used Base64 decoding and a repeating key with an XOR transformation. Reproducing that transformation revealed a credential used in subsequent domain enumeration."},
+
+    {type:"h3", text:"4. LDAP and BloodHound"},
+    {type:"p", text:"I used bloodhound-python to collect Active Directory data, then inspected the resulting relationships in BloodHound. LDAP searches exposed additional account information and a credential associated with the support account."},
+    {type:"code", text:"bloodhound-python --dns-tcp -ns TARGET_IP -d support.htb -u ldap -p 'RECOVERED_PASSWORD' -c all"},
+    {type:"code", text:"ldapsearch -H ldap://support.htb -D 'ldap@support.htb' -w 'RECOVERED_PASSWORD' -b 'dc=support,dc=htb'"},
+    {type:"p", text:"The discovered support credential was validated against SMB before attempting remote access."},
+
+    {type:"h3", text:"5. Initial access through WinRM"},
+    {type:"p", text:"WinRM was exposed on TCP port 5985. Using the recovered support credentials, I established a remote PowerShell session and located the user flag on the account's desktop."},
+    {type:"code", text:"evil-winrm -i TARGET_IP -u support -p 'SUPPORT_PASSWORD'"},
+    {type:"code", text:"cd C:\\Users\\support\\Desktop\ndir\ntype user.txt"},
+
+    {type:"h3", text:"6. MachineAccountQuota"},
+    {type:"p", text:"Further enumeration showed that ms-DS-MachineAccountQuota was set to 10. This setting permits eligible domain users to create machine accounts, but the quota alone does not grant administrator privileges."},
+    {type:"code", text:"Get-DomainObject -Identity 'DC=SUPPORT,DC=HTB' | Select-Object ms-DS-MachineAccountQuota"},
+
+    {type:"h3", text:"7. Resource-Based Constrained Delegation"},
+    {type:"p", text:"The privilege-escalation path used a controlled computer account and the target computer object's msDS-AllowedToActOnBehalfOfOtherIdentity attribute. After configuring the relevant delegation relationship, the workflow used Rubeus to request a service ticket while impersonating Administrator."},
+    {type:"ul", items:["Create a controlled computer account using the lab's authorized tooling.","Inspect the target computer object's permissions and delegation attribute.","Request the appropriate S4U service ticket with Rubeus.","Convert the ticket to a credential-cache format when required.","Use Kerberos authentication against the correct domain host."]},
+    {type:"p", text:"The exact computer name, service principal, and permissions must match the current lab environment. Verify each value rather than copying stale IP addresses or hostnames."},
+
+    {type:"h3", text:"8. Kerberos ticket handling"},
+    {type:"p", text:"The recorded workflow used ticketConverter.py to convert the ticket into a credential-cache file. KRB5CCNAME identifies that cache for compatible Kerberos-aware tools."},
+    {type:"code", text:"python3 ticketConverter.py ticket.kirbi ticket.ccache\nexport KRB5CCNAME=ticket.ccache"},
+
+    {type:"h3", text:"9. Root flag"},
+    {type:"p", text:"After successful privileged authentication, the Administrator desktop contained root.txt. Flag values are intentionally omitted from this public write-up."},
+
+    {type:"h3", text:"10. Lessons learned"},
+    {type:"ul", items:["Inspect accessible SMB shares for tools that may reveal useful implementation details.","Decompile .NET applications when their credential-handling logic is relevant.","Combine LDAP enumeration with BloodHound to understand domain relationships and permissions.","Treat MachineAccountQuota as one part of the attack path, not proof of privilege escalation by itself.","Review computer-object ACLs and RBCD configuration to understand the actual security weakness.","Avoid publishing credentials, ticket material, or HTB flag values."]}
+  ]
+},
+    
   },
   {
     id: "htb-writeup-template",
@@ -110,60 +148,4 @@ window.SITE_POSTS = [
     ]
   },
 
-  {
-  id: "htb-support",
-  section: "htb",
-  title: "Support — Active Directory",
-  date: "2026-11-01",
-  difficulty: "Easy",
-  readTime: "12 min read",
-  tags: ["HTB", "Active Directory", "SMB", "LDAP", "BloodHound", "RBCD"],
-  excerpt: "An Active Directory attack path involving SMB enumeration, .NET reverse engineering, credential discovery, WinRM access, and Resource-Based Constrained Delegation.",
-  body: [
-    {type:"p", text:"Support is an Active Directory lab focused on enumeration, credential discovery, and delegation-based privilege escalation. This write-up follows the observations and commands recorded during the machine walkthrough."},
-
-    {type:"h3", text:"1. Initial enumeration"},
-    {type:"p", text:"The initial Nmap scan identified DNS, Kerberos, LDAP, SMB, and WinRM. LDAP revealed the domain name support.htb. Replace TARGET_IP with the current HTB target address because the IP may change after a reset."},
-    {type:"code", text:"nmap -sC -sV -oN nmap.txt TARGET_IP"},
-
-    {type:"h3", text:"2. SMB enumeration"},
-    {type:"p", text:"Listing the SMB shares revealed an accessible support-tools share containing portable utilities, including UserInfo.exe.zip."},
-    {type:"code", text:"smbclient -L //TARGET_IP/\nsmbclient //TARGET_IP/support-tools\nls\nget UserInfo.exe.zip"},
-
-    {type:"h3", text:"3. Reverse-engineering UserInfo.exe"},
-    {type:"p", text:"After extracting the archive, I decompiled the .NET executable with ILSpy to inspect its credential-handling logic."},
-    {type:"code", text:"ilspycmd UserInfo.exe > UserInfo.cs"},
-    {type:"p", text:"The observed implementation used Base64 decoding and a repeating key with an XOR transformation. Reproducing that transformation revealed a credential used in subsequent domain enumeration."},
-
-    {type:"h3", text:"4. LDAP and BloodHound"},
-    {type:"p", text:"I used bloodhound-python to collect Active Directory data, then inspected the resulting relationships in BloodHound. LDAP searches exposed additional account information and a credential associated with the support account."},
-    {type:"code", text:"bloodhound-python --dns-tcp -ns TARGET_IP -d support.htb -u ldap -p 'RECOVERED_PASSWORD' -c all"},
-    {type:"code", text:"ldapsearch -H ldap://support.htb -D 'ldap@support.htb' -w 'RECOVERED_PASSWORD' -b 'dc=support,dc=htb'"},
-    {type:"p", text:"The discovered support credential was validated against SMB before attempting remote access."},
-
-    {type:"h3", text:"5. Initial access through WinRM"},
-    {type:"p", text:"WinRM was exposed on TCP port 5985. Using the recovered support credentials, I established a remote PowerShell session and located the user flag on the account's desktop."},
-    {type:"code", text:"evil-winrm -i TARGET_IP -u support -p 'SUPPORT_PASSWORD'"},
-    {type:"code", text:"cd C:\\Users\\support\\Desktop\ndir\ntype user.txt"},
-
-    {type:"h3", text:"6. MachineAccountQuota"},
-    {type:"p", text:"Further enumeration showed that ms-DS-MachineAccountQuota was set to 10. This setting permits eligible domain users to create machine accounts, but the quota alone does not grant administrator privileges."},
-    {type:"code", text:"Get-DomainObject -Identity 'DC=SUPPORT,DC=HTB' | Select-Object ms-DS-MachineAccountQuota"},
-
-    {type:"h3", text:"7. Resource-Based Constrained Delegation"},
-    {type:"p", text:"The privilege-escalation path used a controlled computer account and the target computer object's msDS-AllowedToActOnBehalfOfOtherIdentity attribute. After configuring the relevant delegation relationship, the workflow used Rubeus to request a service ticket while impersonating Administrator."},
-    {type:"ul", items:["Create a controlled computer account using the lab's authorized tooling.","Inspect the target computer object's permissions and delegation attribute.","Request the appropriate S4U service ticket with Rubeus.","Convert the ticket to a credential-cache format when required.","Use Kerberos authentication against the correct domain host."]},
-    {type:"p", text:"The exact computer name, service principal, and permissions must match the current lab environment. Verify each value rather than copying stale IP addresses or hostnames."},
-
-    {type:"h3", text:"8. Kerberos ticket handling"},
-    {type:"p", text:"The recorded workflow used ticketConverter.py to convert the ticket into a credential-cache file. KRB5CCNAME identifies that cache for compatible Kerberos-aware tools."},
-    {type:"code", text:"python3 ticketConverter.py ticket.kirbi ticket.ccache\nexport KRB5CCNAME=ticket.ccache"},
-
-    {type:"h3", text:"9. Root flag"},
-    {type:"p", text:"After successful privileged authentication, the Administrator desktop contained root.txt. Flag values are intentionally omitted from this public write-up."},
-
-    {type:"h3", text:"10. Lessons learned"},
-    {type:"ul", items:["Inspect accessible SMB shares for tools that may reveal useful implementation details.","Decompile .NET applications when their credential-handling logic is relevant.","Combine LDAP enumeration with BloodHound to understand domain relationships and permissions.","Treat MachineAccountQuota as one part of the attack path, not proof of privilege escalation by itself.","Review computer-object ACLs and RBCD configuration to understand the actual security weakness.","Avoid publishing credentials, ticket material, or HTB flag values."]}
-  ]
-},
 ];
